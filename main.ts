@@ -1,17 +1,37 @@
-import { Configuration, OpenAIApi } from "openai";
+import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
+
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
-const response = await openai.createCompletion({
+
+const todoList = [
+  "Clear dining room table",
+  "Scoop litter",
+  "Collect trash",
+  "Empty dishwasher",
+  "Fold laundry",
+  "Put out clothes for tomorrow",
+  "Remember work ID",
+];
+
+const chatlog: ChatCompletionRequestMessage[] = [
+  {
+    role: "system",
+    content:
+      "You are a personal assistant to a user with ADHD who has the following todo list:\n\n" +
+      todoList.join("\n"),
+  },
+  {
+    role: "user",
+    content:
+      "Please give me my todo list with how long each task might take, sorted in an order that makes sense",
+  },
+];
+
+const completion = await openai.createChatCompletion({
   model: "gpt-3.5-turbo",
-  prompt:
-    "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n\nHuman: Hello, who are you?\nAI: I am an AI created by OpenAI. How can I help you today?\nHuman: I'd like to cancel my subscription.\nAI:",
-  temperature: 0.9,
-  max_tokens: 150,
-  top_p: 1,
-  frequency_penalty: 0.0,
-  presence_penalty: 0.6,
-  stop: [" Human:", " AI:"],
+  messages: chatlog,
 });
-console.log(response);
+console.log(completion);
+console.log(completion.data.choices[0].message);
